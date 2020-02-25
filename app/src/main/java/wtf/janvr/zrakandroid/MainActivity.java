@@ -1,16 +1,19 @@
-package com.example.zrakandroid;
+package wtf.janvr.zrakandroid;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
@@ -23,8 +26,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,15 +38,24 @@ public class MainActivity extends AppCompatActivity {
     String username;
     String password;
     Boolean loggedIn;
-    final String URL_DEVICES = "https://api.zrak.janvr.wtf/devices";
+    private final int MENU_LOGOUT = 0;
+    private final int MENU_REFRESH_DEVICES = 1;
+    public static final String URL_USERS = "https://api.zrak.janvr.wtf/users";
+    public static final String URL_DEVICES = "https://api.zrak.janvr.wtf/devices";
+    public static final String URL_MEASUREMENTS = "https://api.zrak.janvr.wtf/measurements";
     SimpleAdapter devices_adapter;
     ArrayList<Map<String, String>> devices_list;
     ListView devices_lv;
+    String auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle(getString(R.string.devices_overview));
+
+//        Toolbar toolbar = findViewById(R.id.main_toolbar);
+//        setSupportActionBar(toolbar);
 
         SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
         loggedIn = sharedPrefs.getBoolean("authorized", false);
@@ -55,16 +68,52 @@ public class MainActivity extends AppCompatActivity {
         }
         username = sharedPrefs.getString("username", null);
         password = sharedPrefs.getString("password", null);
-        String auth = getString(R.string.basic_auth, username, password);
+        auth = getString(R.string.basic_auth, username, password);
 
         devices_lv = findViewById(R.id.main_devices_list);
 
-        RequestQueue rq = VolleySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
-        rq.add(createDevicesRequest(auth));
+        getDevices(auth);
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, MENU_REFRESH_DEVICES, 0, "Refresh");
+        menu.add(0, MENU_LOGOUT, 1, "Log out");
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemID = item.getItemId();
+        switch (itemID) {
+            case MENU_LOGOUT:
+                logOut();
+                return true;
+            case MENU_REFRESH_DEVICES:
+                getDevices(auth);
+                return true;
+        }
+        return true;
+    }
+
+    public void logOut() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("username");
+        editor.remove("password");
+        editor.putBoolean("authorized", false);
+        editor.commit();
+
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void getDevices(String auth) {
+        RequestQueue rq = VolleySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
+        rq.add(createDevicesRequest(auth));
+    }
     private JsonObjectRequest createDevicesRequest(final String auth) {
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, URL_DEVICES, null, new Response.Listener<JSONObject>() {
@@ -84,12 +133,14 @@ public class MainActivity extends AppCompatActivity {
                                 Map<String, String> dev_map = new HashMap<String, String>();
                                 dev_map.put("name", dev.getString("name"));
                                 dev_map.put("location", dev.getString("location"));
+                                dev_map.put("id", String.valueOf(dev.getInt("id")));
                                 devices_list.add(dev_map);
                             } catch (JSONException e) {
                                 Log.d("zrak", e.toString());
                             }
                         }
 
+                        Collections.sort(devices_list, new MapComparator("name", true));
                         devices_adapter = new SimpleAdapter(getApplicationContext(), devices_list,
                                 R.layout.device_card, new String[]{"name", "location"},
                                 new int[]{R.id.device_card_name, R.id.device_card_location});
@@ -101,6 +152,8 @@ public class MainActivity extends AppCompatActivity {
                                 TextView name_tv = view.findViewById(R.id.device_card_name);
                                 String dev_name = name_tv.getText().toString();
                                 Intent intent = new Intent(getApplicationContext(), DeviceActivity.class);
+                                Log.d("zrak", "device_id: " + devices_list.get(position).get("id"));
+                                intent.putExtra("device_id", devices_list.get(position).get("id"));
                                 intent.putExtra("device_name", dev_name);
                                 startActivity(intent);
                             }
@@ -113,23 +166,20 @@ public class MainActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         Log.d("zrak", "network error");
                         if (error.networkResponse == null) return;
-                        try {
-                            TextView tv = findViewById(R.id.main_message);
-                            tv.setText(new String(error.networkResponse.data, "UTF-8"));
-                        } catch (UnsupportedEncodingException e) {
-                            Log.d("zrak", "exception");
-                        }
+                        TextView tv = findViewById(R.id.main_message);
+                        tv.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));
 
                     }
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", "Basic " + Base64.encodeToString(auth.getBytes(), Base64.DEFAULT));
-                return params;
+                Map<String, String> headers = new HashMap<String, String>();
+                headers.put("Authorization", "Basic " + Base64.encodeToString(auth.getBytes(), Base64.DEFAULT));
+                return headers;
             }
 
         };
+        req.setShouldCache(false);
         return req;
     }
 }

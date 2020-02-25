@@ -1,4 +1,4 @@
-package com.example.zrakandroid;
+package wtf.janvr.zrakandroid;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,18 +19,24 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
-    final String URL_USERS = "https://api.zrak.janvr.wtf/users";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        setTitle(getString(R.string.sign_in));
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("authorized", false)) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
 
@@ -45,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public JsonObjectRequest createLoginRequest(final String username, final String password) {
         final String auth = getString(R.string.basic_auth, username, password);
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, URL_USERS, null,
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, MainActivity.URL_USERS, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -58,6 +64,7 @@ public class LoginActivity extends AppCompatActivity {
                         editor.commit();
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
+                        finish();
 
                     }
                 },
@@ -68,12 +75,8 @@ public class LoginActivity extends AppCompatActivity {
 
                         TextView message = findViewById(R.id.login_message);
                         if (error.networkResponse == null) return;
-                        try {
-                            message.setText(new String(error.networkResponse.data, "UTF-8"));
-                            message.setVisibility(View.VISIBLE);
-                        } catch (UnsupportedEncodingException e) {
-                            Log.d("zrak", "exception");
-                        }
+                        message.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));
+                        message.setVisibility(View.VISIBLE);
                     }
                 }
         ) {
@@ -85,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                 return headers;
             }
         };
+        req.setShouldCache(false);
         return req;
     }
 }

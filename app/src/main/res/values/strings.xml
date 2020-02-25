@@ -7,4 +7,7 @@
     <string name="basic_auth">%1$s:%2$s</string>
     <string name="title_activity_login">Sign in</string>
     <string name="sign_in">Sign in</string>
+    <string name="name">Name</string>
+    <string name="device_info">Device Info</string>
+    <string name="devices_overview">Devices overview</string>
 </resources>

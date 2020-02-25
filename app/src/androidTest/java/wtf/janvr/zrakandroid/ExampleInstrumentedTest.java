@@ -1,4 +1,4 @@
-package com.example.zrakandroid;
+package wtf.janvr.zrakandroid;
 
 import android.content.Context;
 
