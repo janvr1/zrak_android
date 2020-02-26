@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:layout_gravity="center"
     tools:context="wtf.janvr.zrakandroid.MainActivity">
 
     <TextView
@@ -12,11 +13,15 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <ListView
+    <GridView
         android:id="@+id/main_devices_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"
+        android:numColumns="2"
+        android:padding="8dp"
+        android:horizontalSpacing="4dp"
+        android:verticalSpacing="4dp" />
 
 </LinearLayout>

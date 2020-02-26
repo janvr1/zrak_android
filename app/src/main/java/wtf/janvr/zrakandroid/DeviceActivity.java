@@ -2,13 +2,22 @@ package wtf.janvr.zrakandroid;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
@@ -22,17 +31,31 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class DeviceActivity extends AppCompatActivity {
 
     ArrayList<Map<String, String>> measurements;
     ListView meas_lv;
     SimpleAdapter meas_lv_adapter;
+    Calendar calendar;
+    String dev_id;
+    String auth;
+    EditText limit_tv;
+    TextView stop_date_tv;
+    TextView stop_time_tv;
+    TextView start_time_tv;
+    TextView start_date_tv;
+    TextView message_tv;
+    int DEFAULT_MEAS_LIM = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,30 +65,146 @@ public class DeviceActivity extends AppCompatActivity {
         SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
         String username = sharedPrefs.getString("username", null);
         String password = sharedPrefs.getString("password", null);
-        String auth = getString(R.string.basic_auth, username, password);
+        auth = getString(R.string.basic_auth, username, password);
 
         Intent intent = this.getIntent();
         String dev_name = intent.getStringExtra("device_name");
-        String dev_id = intent.getStringExtra("device_id");
+        dev_id = intent.getStringExtra("device_id");
 
         setTitle(dev_name);
+        limit_tv = findViewById(R.id.device_limit_text);
+        limit_tv.setText(String.valueOf(DEFAULT_MEAS_LIM));
+        start_time_tv = findViewById(R.id.device_start_time_text);
+        start_date_tv = findViewById(R.id.device_start_date_text);
+        stop_time_tv = findViewById(R.id.device_stop_time_text);
+        stop_date_tv = findViewById(R.id.device_stop_date_text);
+        message_tv = findViewById(R.id.device_message);
 
         meas_lv = findViewById(R.id.meas_listview);
-        getMeasurements(auth, dev_id, null, null, 30);
+        getMeasurements();
     }
 
-    private void getDevice(String auth, String id) {
-        RequestQueue rq = VolleySingleton.getInstance(getApplicationContext()).getRequestQueue();
-        rq.add(createDeviceRequest(auth, id));
+    public void startTimePicker(View v) {
+        TimePickerFragment tpf = new TimePickerFragment(TimePickerFragment.START_TIME_PICKER);
+        tpf.show(getSupportFragmentManager(), "startTimePicker");
     }
 
-    private void getMeasurements(String auth, String id, String start, String stop, int lim) {
+    public void stopTimePicker(View v) {
+        TimePickerFragment tpf = new TimePickerFragment(TimePickerFragment.STOP_TIME_PICKER);
+        tpf.show(getSupportFragmentManager(), "stopTimePicker");
+    }
+
+    public void startDatePicker(View v) {
+        DatePickerFragment dpf = new DatePickerFragment(DatePickerFragment.START_DATE_PICKER);
+        dpf.show(getSupportFragmentManager(), "startDatePicker");
+    }
+
+    public void stopDatePicker(View v) {
+        DatePickerFragment dpf = new DatePickerFragment(DatePickerFragment.STOP_DATE_PICKER);
+        dpf.show(getSupportFragmentManager(), "stopDatePicker");
+    }
+
+
+//    private void getDevice(String auth, String id) {
+//        RequestQueue rq = VolleySingleton.getInstance(getApplicationContext()).getRequestQueue();
+//        rq.add(createDeviceRequest(auth, id));
+//    }
+
+    private void getMeasurements() {
+        String start_time = start_time_tv.getText().toString();
+        String start_date = start_date_tv.getText().toString();
+        String stop_time = stop_time_tv.getText().toString();
+        String stop_date = stop_date_tv.getText().toString();
+        String limit = limit_tv.getText().toString();
+        String start_datetime_utc = null;
+        String stop_datetime_utc = null;
+
+        SimpleDateFormat sdf_inp = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+        SimpleDateFormat sdf_out = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        sdf_out.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        message_tv.setVisibility(View.GONE);
+
+        if (start_time.equals(getString(R.string.time)) ^
+                start_date.equals(getString(R.string.date))) {
+            message_tv.setText("Please enter both, start date and start time");
+            message_tv.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            if (start_time.equals(getString(R.string.time)) &&
+                    start_date.equals(getString(R.string.date))) {
+                start_datetime_utc = null;
+            } else {
+                try {
+                    Date date_start = sdf_inp.parse(start_time + " " + start_date);
+                    start_datetime_utc = sdf_out.format(date_start);
+
+                    Log.d("jan", start_datetime_utc);
+                } catch (ParseException pe) {
+                    Log.d("jan", pe.toString());
+                }
+            }
+        }
+
+        if (stop_time.equals(getString(R.string.time)) ^
+                stop_date.equals(getString(R.string.date))) {
+            message_tv.setText("Please enter both, stop date and stop time");
+            message_tv.setVisibility(View.VISIBLE);
+            return;
+        } else {
+            if (stop_time.equals(getString(R.string.time)) &&
+                    stop_date.equals(getString(R.string.date))) {
+                stop_datetime_utc = null;
+            } else {
+                try {
+                    Date date_stop = sdf_inp.parse(stop_time + " " + stop_date);
+                    stop_datetime_utc = sdf_out.format(date_stop);
+
+                    Log.d("jan", stop_datetime_utc);
+                } catch (ParseException pe) {
+                    Log.d("jan", pe.toString());
+                }
+            }
+        }
+
+        if (limit == "") {
+            message_tv.setText("Please enter a limit number");
+            message_tv.setVisibility(View.VISIBLE);
+            return;
+        }
+
         RequestQueue rq = VolleySingleton.getInstance(getApplicationContext()).getRequestQueue();
-        rq.add(createMeasurementsRequest(auth, id, start, stop, String.valueOf(lim)));
+        rq.add(createMeasurementsRequest(auth, dev_id, start_datetime_utc, stop_datetime_utc, limit));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.device_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.refresh_icon:
+                Toast.makeText(this, "refresh", Toast.LENGTH_SHORT).show();
+                getMeasurements();
+                break;
+            case R.id.device_menu_reset_time:
+                start_date_tv.setText(getString(R.string.date));
+                stop_date_tv.setText(getString(R.string.date));
+                start_time_tv.setText(getString(R.string.time));
+                stop_time_tv.setText(getString(R.string.time));
+                break;
+
+        }
+        return true;
     }
 
     private JsonObjectRequest createMeasurementsRequest(final String auth, final String dev_id,
-                                                        final String start, final String stop,
+                                                        @Nullable final String start,
+                                                        @Nullable final String stop,
                                                         final String lim) {
         String url = MainActivity.URL_MEASUREMENTS;
         url += "?device_id=" + dev_id;
@@ -119,6 +258,7 @@ public class DeviceActivity extends AppCompatActivity {
                         if (error.networkResponse == null) return;
                         Log.d("jan", new String(error.networkResponse.data, StandardCharsets.UTF_8));
                         Log.d("jan", error.networkResponse.headers.toString());
+                        Toast.makeText(DeviceActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
 
                     }
                 }) {
@@ -149,6 +289,7 @@ public class DeviceActivity extends AppCompatActivity {
                         if (error.networkResponse == null) return;
                         TextView tv = findViewById(R.id.main_message);
                         tv.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));
+                        Toast.makeText(DeviceActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
 
                     }
                 }) {

@@ -5,9 +5,17 @@
     <string name="username">Username</string>
     <string name="login_shared_pref">login_data</string>
     <string name="basic_auth">%1$s:%2$s</string>
+    <string name="time_string">%1$02d:%2$02d</string>
+    <string name="date_string">%1$02d.%2$02d.%3$d</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="sign_in">Sign in</string>
+    <string name="sign_in">Log in</string>
     <string name="name">Name</string>
     <string name="device_info">Device Info</string>
     <string name="devices_overview">Devices overview</string>
+    <string name="password">Password</string>
+    <string name="refresh">Refresh</string>
+    <string name="network_error">Network error</string>
+    <string name="time">Time</string>
+    <string name="date">Date</string>
+    <string name="reset_time">Reset time</string>
 </resources>

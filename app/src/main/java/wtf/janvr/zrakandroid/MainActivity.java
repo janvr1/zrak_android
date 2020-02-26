@@ -9,9 +9,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.GridView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String URL_MEASUREMENTS = "https://api.zrak.janvr.wtf/measurements";
     SimpleAdapter devices_adapter;
     ArrayList<Map<String, String>> devices_list;
-    ListView devices_lv;
+    GridView devices_lv;
     String auth;
 
     @Override
@@ -79,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, MENU_REFRESH_DEVICES, 0, "Refresh");
+        MenuItem refresh = menu.findItem(MENU_REFRESH_DEVICES);
+        refresh.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        refresh.setIcon(R.drawable.ic_refresh_black_24dp);
         menu.add(0, MENU_LOGOUT, 1, "Log out");
         return true;
     }
@@ -89,10 +93,11 @@ public class MainActivity extends AppCompatActivity {
         switch (itemID) {
             case MENU_LOGOUT:
                 logOut();
-                return true;
+                break;
             case MENU_REFRESH_DEVICES:
+                Toast.makeText(this, "refresh devices", Toast.LENGTH_SHORT).show();
                 getDevices(auth);
-                return true;
+                break;
         }
         return true;
     }
@@ -114,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         RequestQueue rq = VolleySingleton.getInstance(this.getApplicationContext()).getRequestQueue();
         rq.add(createDevicesRequest(auth));
     }
+
     private JsonObjectRequest createDevicesRequest(final String auth) {
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, URL_DEVICES, null, new Response.Listener<JSONObject>() {
