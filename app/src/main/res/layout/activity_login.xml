@@ -45,6 +45,7 @@
             android:layout_marginHorizontal="4dp"
             android:background="@android:color/transparent"
             android:ems="12"
+            android:textColor="@color/myTextColor"
             android:hint="@string/username"
             android:inputType="text"
             android:padding="4dp"
@@ -84,6 +85,7 @@
             android:background="@android:color/transparent"
             android:ems="12"
             android:hint="@string/password"
+            android:textColor="@color/myTextColor"
             android:inputType="textPassword"
             android:padding="4dp"
             android:textSize="22sp" />

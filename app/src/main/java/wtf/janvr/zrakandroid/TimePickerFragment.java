@@ -42,12 +42,10 @@ public class TimePickerFragment extends DialogFragment
             case START_TIME_PICKER:
                 TextView tv_start = getActivity().findViewById(R.id.device_start_time_text);
                 tv_start.setText(time_s);
-                tv_start.setTextColor(getResources().getColor(R.color.myTextColor, getContext().getTheme()));
                 break;
             case STOP_TIME_PICKER:
                 TextView tv_stop = getActivity().findViewById(R.id.device_stop_time_text);
                 tv_stop.setText(time_s);
-                tv_stop.setTextColor(getResources().getColor(R.color.myTextColor, getContext().getTheme()));
                 break;
         }
         return;

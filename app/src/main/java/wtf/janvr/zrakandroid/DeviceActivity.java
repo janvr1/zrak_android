@@ -20,7 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -79,8 +78,10 @@ public class DeviceActivity extends AppCompatActivity {
         stop_date_tv = findViewById(R.id.device_stop_date_text);
         message_tv = findViewById(R.id.device_message);
 
-
-        Log.d("jan", String.valueOf(stop_time_tv.getCurrentTextColor()));
+        if (start_time_tv.getText().toString() == null) {
+            Log.d("jan", "gettextjenull");
+        }
+        Log.d("jan", "start_time_text: " + start_time_tv.getText().toString());
 
         meas_lv = findViewById(R.id.meas_listview);
         getMeasurements();
@@ -127,14 +128,12 @@ public class DeviceActivity extends AppCompatActivity {
 
         message_tv.setVisibility(View.GONE);
 
-        if (start_time.equals(getString(R.string.time)) ^
-                start_date.equals(getString(R.string.date))) {
+        if (start_time.equals("") ^ start_date.equals("")) {
             message_tv.setText("Please enter both, start date and start time");
             message_tv.setVisibility(View.VISIBLE);
             return;
         } else {
-            if (start_time.equals(getString(R.string.time)) &&
-                    start_date.equals(getString(R.string.date))) {
+            if (start_time.equals("") && start_date.equals("")) {
                 start_datetime_utc = null;
             } else {
                 try {
@@ -148,14 +147,12 @@ public class DeviceActivity extends AppCompatActivity {
             }
         }
 
-        if (stop_time.equals(getString(R.string.time)) ^
-                stop_date.equals(getString(R.string.date))) {
+        if (stop_time.equals("") ^ stop_date.equals("")) {
             message_tv.setText("Please enter both, stop date and stop time");
             message_tv.setVisibility(View.VISIBLE);
             return;
         } else {
-            if (stop_time.equals(getString(R.string.time)) &&
-                    stop_date.equals(getString(R.string.date))) {
+            if (stop_time.equals("") && stop_date.equals("")) {
                 stop_datetime_utc = null;
             } else {
                 try {
@@ -171,9 +168,6 @@ public class DeviceActivity extends AppCompatActivity {
 
         if (limit == "") {
             limit = null;
-            /*message_tv.setText("Please enter a limit number");
-            message_tv.setVisibility(View.VISIBLE);
-            return;*/
         }
 
         RequestQueue rq = VolleySingleton.getInstance(getApplicationContext()).getRequestQueue();
@@ -195,10 +189,10 @@ public class DeviceActivity extends AppCompatActivity {
                 getMeasurements();
                 break;
             case R.id.device_menu_reset_time:
-                start_date_tv.setText(null);
-                stop_date_tv.setText(null);
-                start_time_tv.setText(null);
-                stop_time_tv.setText(null);
+                start_date_tv.setText("");
+                stop_date_tv.setText("");
+                start_time_tv.setText("");
+                stop_time_tv.setText("");
                 break;
 
         }
@@ -236,15 +230,15 @@ public class DeviceActivity extends AppCompatActivity {
                                 Date meas_date = sdf_inp.parse(utc_time);
                                 SimpleDateFormat sdf_out = new SimpleDateFormat("dd.MM.yyyy HH:mm");
                                 measurement.put("time", sdf_out.format(meas_date));
-                                String values = "";
+                                StringBuilder values_builder = new StringBuilder();
                                 Iterator<String> keys2 = json.keys();
                                 while (keys2.hasNext()) {
                                     String key2 = keys2.next();
                                     if (!key2.equals("time") && !key2.equals("dev_id") && !key2.equals("id")) {
-                                        values += key2 + "=" + json.getString(key2) + " ";
+                                        values_builder.append(key2).append(": ").append(json.getString(key2)).append(" ");
                                     }
                                 }
-                                measurement.put("values", values);
+                                measurement.put("values", values_builder.toString());
                             } catch (Exception e) {
                                 Log.d("jan", e.toString());
                             }
@@ -281,7 +275,7 @@ public class DeviceActivity extends AppCompatActivity {
         return req;
     }
 
-    private JsonObjectRequest createDeviceRequest(final String auth, final String dev_id) {
+    /*private JsonObjectRequest createDeviceRequest(final String auth, final String dev_id) {
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, MainActivity.URL_DEVICES, null, new Response.Listener<JSONObject>() {
 
@@ -316,5 +310,5 @@ public class DeviceActivity extends AppCompatActivity {
             }
         };
         return req;
-    }
+    }*/
 }

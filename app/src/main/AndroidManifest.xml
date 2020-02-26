@@ -13,12 +13,11 @@
         android:theme="@style/AppTheme">
         <!--        android:theme="@style/Theme.AppCompat.Light.NoActionBar">-->
 
-        <activity android:name="wtf.janvr.zrakandroid.DeviceActivity"></activity>
+        <activity android:name="wtf.janvr.zrakandroid.DeviceActivity" />
         <activity android:name="wtf.janvr.zrakandroid.LoginActivity" />
         <activity android:name="wtf.janvr.zrakandroid.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

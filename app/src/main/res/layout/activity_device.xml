@@ -86,17 +86,19 @@
                     android:id="@+id/device_stop_time_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:hint="@string/time"
                     android:onClick="stopTimePicker"
                     android:paddingRight="8dp"
-                    android:hint="@string/time"
+                    android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
 
                 <TextView
                     android:id="@+id/device_stop_date_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:onClick="stopDatePicker"
                     android:hint="@string/date"
+                    android:onClick="stopDatePicker"
+                    android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -123,17 +125,19 @@
                     android:id="@+id/device_start_time_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:hint="@string/time"
                     android:onClick="startTimePicker"
                     android:paddingRight="8dp"
-                    android:hint="@string/time"
+                    android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
 
                 <TextView
                     android:id="@+id/device_start_date_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:onClick="startDatePicker"
                     android:hint="@string/date"
+                    android:onClick="startDatePicker"
+                    android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -144,6 +148,8 @@
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:visibility="gone"
+            android:textSize="18sp"
+            android:textColor="@color/myTextColor"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintLeft_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/device_limit_card" />
