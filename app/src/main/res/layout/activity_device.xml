@@ -2,13 +2,11 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8dp"
-    android:paddingBottom="0dp"
-    tools:context="wtf.janvr.zrakandroid.DeviceActivity">
+    android:paddingBottom="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,6 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Start: "
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@id/device_start_card"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="@id/device_start_card" />
@@ -29,6 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Stop: "
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@id/device_stop_card"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="@id/device_stop_card" />
@@ -38,6 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Limit: "
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@id/device_limit_card"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="@id/device_limit_card" />
@@ -78,7 +79,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="4dp">
 
                 <TextView
                     android:id="@+id/device_stop_time_text"
@@ -86,7 +88,7 @@
                     android:layout_height="match_parent"
                     android:onClick="stopTimePicker"
                     android:paddingRight="8dp"
-                    android:text="@string/time"
+                    android:hint="@string/time"
                     android:textSize="22sp" />
 
                 <TextView
@@ -94,7 +96,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:onClick="stopDatePicker"
-                    android:text="@string/date"
+                    android:hint="@string/date"
                     android:textSize="22sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -114,7 +116,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="4dp">
 
                 <TextView
                     android:id="@+id/device_start_time_text"
@@ -122,7 +125,7 @@
                     android:layout_height="match_parent"
                     android:onClick="startTimePicker"
                     android:paddingRight="8dp"
-                    android:text="@string/time"
+                    android:hint="@string/time"
                     android:textSize="22sp" />
 
                 <TextView
@@ -130,26 +133,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:onClick="startDatePicker"
-                    android:text="@string/date"
+                    android:hint="@string/date"
                     android:textSize="22sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/device_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/device_limit_card" />
 
-    <TextView
-        android:id="@+id/device_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ListView
         android:id="@+id/meas_listview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@null"
-        android:dividerHeight="0dp">
+        android:dividerHeight="0dp" />
 
-    </ListView>
 </LinearLayout>

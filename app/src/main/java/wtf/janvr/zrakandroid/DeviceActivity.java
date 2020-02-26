@@ -27,7 +27,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -79,6 +78,9 @@ public class DeviceActivity extends AppCompatActivity {
         stop_time_tv = findViewById(R.id.device_stop_time_text);
         stop_date_tv = findViewById(R.id.device_stop_date_text);
         message_tv = findViewById(R.id.device_message);
+
+
+        Log.d("jan", String.valueOf(stop_time_tv.getCurrentTextColor()));
 
         meas_lv = findViewById(R.id.meas_listview);
         getMeasurements();
@@ -168,9 +170,10 @@ public class DeviceActivity extends AppCompatActivity {
         }
 
         if (limit == "") {
-            message_tv.setText("Please enter a limit number");
+            limit = null;
+            /*message_tv.setText("Please enter a limit number");
             message_tv.setVisibility(View.VISIBLE);
-            return;
+            return;*/
         }
 
         RequestQueue rq = VolleySingleton.getInstance(getApplicationContext()).getRequestQueue();
@@ -192,10 +195,10 @@ public class DeviceActivity extends AppCompatActivity {
                 getMeasurements();
                 break;
             case R.id.device_menu_reset_time:
-                start_date_tv.setText(getString(R.string.date));
-                stop_date_tv.setText(getString(R.string.date));
-                start_time_tv.setText(getString(R.string.time));
-                stop_time_tv.setText(getString(R.string.time));
+                start_date_tv.setText(null);
+                stop_date_tv.setText(null);
+                start_time_tv.setText(null);
+                stop_time_tv.setText(null);
                 break;
 
         }
@@ -205,7 +208,7 @@ public class DeviceActivity extends AppCompatActivity {
     private JsonObjectRequest createMeasurementsRequest(final String auth, final String dev_id,
                                                         @Nullable final String start,
                                                         @Nullable final String stop,
-                                                        final String lim) {
+                                                        @Nullable final String lim) {
         String url = MainActivity.URL_MEASUREMENTS;
         url += "?device_id=" + dev_id;
         if (start != null) url += "&start=" + start;
@@ -227,7 +230,12 @@ public class DeviceActivity extends AppCompatActivity {
                             Map<String, String> measurement = new HashMap<>();
                             try {
                                 JSONObject json = (JSONObject) response.get(key);
-                                measurement.put("time", json.getString("time"));
+                                String utc_time = json.getString("time");
+                                SimpleDateFormat sdf_inp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                sdf_inp.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                Date meas_date = sdf_inp.parse(utc_time);
+                                SimpleDateFormat sdf_out = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+                                measurement.put("time", sdf_out.format(meas_date));
                                 String values = "";
                                 Iterator<String> keys2 = json.keys();
                                 while (keys2.hasNext()) {
@@ -237,7 +245,7 @@ public class DeviceActivity extends AppCompatActivity {
                                     }
                                 }
                                 measurement.put("values", values);
-                            } catch (JSONException e) {
+                            } catch (Exception e) {
                                 Log.d("jan", e.toString());
                             }
                             measurements.add(measurement);
