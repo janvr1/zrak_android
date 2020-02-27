@@ -1,6 +1,7 @@
 package wtf.janvr.zrakandroid;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -88,12 +90,15 @@ public class DeviceActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 limit_tv.clearFocus();
+                InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 return false;
             }
         };
 
         constraintLayout.setOnTouchListener(onTouchListener);
         measurements_card_view.setOnTouchListener(onTouchListener);
+        measurementsTable.setOnTouchListener(onTouchListener);
 
         stop_cv = findViewById(R.id.device_stop_card);
         start_cv = findViewById(R.id.device_start_card);
