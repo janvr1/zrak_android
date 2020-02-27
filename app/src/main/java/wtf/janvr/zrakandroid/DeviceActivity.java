@@ -1,24 +1,31 @@
 package wtf.janvr.zrakandroid;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.icu.util.Calendar;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -41,19 +48,14 @@ import java.util.TimeZone;
 
 public class DeviceActivity extends AppCompatActivity {
 
-    ArrayList<Map<String, String>> measurements;
-    ListView meas_lv;
-    SimpleAdapter meas_lv_adapter;
-    Calendar calendar;
     String dev_id;
     String auth;
     EditText limit_tv;
-    TextView stop_date_tv;
-    TextView stop_time_tv;
-    TextView start_time_tv;
-    TextView start_date_tv;
-    TextView message_tv;
+    TextView stop_date_tv, stop_time_tv, start_time_tv, start_date_tv, message_tv;
     int DEFAULT_MEAS_LIM = 20;
+    ConstraintLayout constraintLayout;
+    CardView stop_cv, start_cv, measurements_card_view;
+    TableLayout measurementsTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,13 +79,57 @@ public class DeviceActivity extends AppCompatActivity {
         stop_time_tv = findViewById(R.id.device_stop_time_text);
         stop_date_tv = findViewById(R.id.device_stop_date_text);
         message_tv = findViewById(R.id.device_message);
+        measurementsTable = findViewById(R.id.measurements_table);
+        measurements_card_view = findViewById(R.id.measurements_card_view);
 
-        if (start_time_tv.getText().toString() == null) {
-            Log.d("jan", "gettextjenull");
-        }
-        Log.d("jan", "start_time_text: " + start_time_tv.getText().toString());
+        constraintLayout = findViewById(R.id.device_constraint_layout);
 
-        meas_lv = findViewById(R.id.meas_listview);
+        View.OnTouchListener onTouchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                limit_tv.clearFocus();
+                return false;
+            }
+        };
+
+        constraintLayout.setOnTouchListener(onTouchListener);
+        measurements_card_view.setOnTouchListener(onTouchListener);
+
+        stop_cv = findViewById(R.id.device_stop_card);
+        start_cv = findViewById(R.id.device_start_card);
+
+        View.OnLayoutChangeListener layoutChangeListener = new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                int stop_width = stop_cv.getWidth();
+                int start_width = start_cv.getWidth();
+
+                if (stop_width == 0 || start_width == 0) {
+                    return;
+                }
+
+                ConstraintSet constraints = new ConstraintSet();
+                constraints.clone(constraintLayout);
+                constraints.clear(R.id.device_stop_card, ConstraintSet.RIGHT);
+                constraints.clear(R.id.device_start_card, ConstraintSet.RIGHT);
+                constraints.applyTo(constraintLayout);
+
+                stop_width = stop_cv.getWidth();
+                start_width = start_cv.getWidth();
+
+                if (start_width > stop_width) {
+                    constraints.connect(R.id.device_stop_card, ConstraintSet.RIGHT, R.id.device_start_card, ConstraintSet.RIGHT);
+                    constraints.applyTo(constraintLayout);
+                }
+                if (start_width < stop_width) {
+                    constraints.connect(R.id.device_start_card, ConstraintSet.RIGHT, R.id.device_stop_card, ConstraintSet.RIGHT);
+                    constraints.applyTo(constraintLayout);
+                }
+            }
+        };
+
+        stop_cv.addOnLayoutChangeListener(layoutChangeListener);
+        start_cv.addOnLayoutChangeListener(layoutChangeListener);
         getMeasurements();
     }
 
@@ -107,11 +153,6 @@ public class DeviceActivity extends AppCompatActivity {
         dpf.show(getSupportFragmentManager(), "stopDatePicker");
     }
 
-
-//    private void getDevice(String auth, String id) {
-//        RequestQueue rq = VolleySingleton.getInstance(getApplicationContext()).getRequestQueue();
-//        rq.add(createDeviceRequest(auth, id));
-//    }
 
     private void getMeasurements() {
         String start_time = start_time_tv.getText().toString();
@@ -185,7 +226,7 @@ public class DeviceActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh_icon:
-                Toast.makeText(this, "refresh", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.refresh_measurements, Toast.LENGTH_SHORT).show();
                 getMeasurements();
                 break;
             case R.id.device_menu_reset_time:
@@ -213,9 +254,96 @@ public class DeviceActivity extends AppCompatActivity {
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("jan", response.toString());
+                        try {
+                            Iterator<String> iter = response.keys();
+                            if (!iter.hasNext()) {
+                                message_tv.setText(R.string.no_measurements_message);
+                                message_tv.setVisibility(View.VISIBLE);
+                                measurements_card_view.setVisibility(View.GONE);
+                                return;
+                            }
+
+                            message_tv.setVisibility(View.GONE);
+                            measurements_card_view.setVisibility(View.VISIBLE);
+
+                            measurementsTable.removeAllViews();
+
+                            Iterator<String> var_i = ((JSONObject) response.get("0")).keys();
+                            ArrayList<String> variables = new ArrayList();
+                            Context ctx = getApplicationContext();
+                            TableRow th = new TableRow(ctx);
+
+
+                            ArrayList<JSONObject> measurements_array = new ArrayList<>();
+                            while (iter.hasNext()) {
+                                measurements_array.add((JSONObject) response.get(iter.next()));
+                            }
+                            Log.d("jan_arr", measurements_array.toString());
+                            JSONComparator comparator = new JSONComparator("time", false);
+                            Collections.sort(measurements_array, comparator);
+                            Log.d("jan_arr", measurements_array.toString());
+
+                            while (var_i.hasNext()) {
+                                String s = var_i.next();
+                                if (!s.equals("dev_id") && !s.equals("id")) {
+                                    TextView tv = new TextView(ctx);
+                                    tv.setTypeface(null, Typeface.BOLD);
+                                    tv.setTextSize(18);
+                                    tv.setPadding(4, 4, 16, 4);
+                                    tv.setTextColor(getResources().getColor(R.color.myTextColor, ctx.getTheme()));
+                                    if (s.equals("time")) {
+                                        tv.setText("Time");
+                                        th.addView(tv, 0);
+                                        variables.add(0, s);
+                                    } else {
+                                        tv.setText(s);
+                                        th.addView(tv);
+                                        variables.add(s);
+                                    }
+                                }
+                                Log.d("jan s", s);
+                            }
+                            Log.d("jan", variables.toString());
+                            measurementsTable.addView(th);
+                            Iterator<String> keys = response.keys();
+
+                            SimpleDateFormat sdf_inp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            sdf_inp.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            SimpleDateFormat sdf_out = new SimpleDateFormat("HH:mm'\n'dd.MM.yyyy");
+
+                           /* while (keys.hasNext()) {
+                                String meas_key = keys.next();*/
+                            for (JSONObject measurement : measurements_array) {
+                                TableRow tr = new TableRow(getApplicationContext());
+                                tr.setGravity(Gravity.CENTER_VERTICAL);
+                                for (String variable : variables) {
+                                    TextView tv = new TextView(ctx);
+                                    tv.setTextSize(16);
+                                    tv.setPadding(4, 4, 16, 4);
+                                    tv.setTextColor(getResources().getColor(R.color.myTextColor, ctx.getTheme()));
+                                    if (variable.equals("time")) {
+//                                        tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                        Date meas_date = sdf_inp.parse(measurement.get(variable).toString());
+                                        tv.setText(sdf_out.format(meas_date));
+                                    } else {
+                                        tv.setText(measurement.get(variable).toString());
+                                    }
+                                    tr.addView(tv);
+                                }
+                                measurementsTable.addView(tr);
+
+                            }
+//                        Log.d("jan_variables", variables.toString());
+                        } catch (Exception e) {
+                            //bla bla
+                            Log.d("janexception", e.toString());
+                        }
+
+
+                        /*Log.d("jan", response.toString());
 
                         measurements = new ArrayList<>();
                         Iterator<String> keys = response.keys();
@@ -251,7 +379,7 @@ public class DeviceActivity extends AppCompatActivity {
                                 R.layout.measurement_card, new String[]{"time", "values"},
                                 new int[]{R.id.meas_card_time, R.id.meas_card_val});
                         meas_lv.setAdapter(meas_lv_adapter);
-
+*/
                     }
                 }, new Response.ErrorListener() {
 

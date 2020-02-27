@@ -5,10 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="8dp"
+    android:paddingLeft="4dp"
+    android:paddingTop="8dp"
+    android:paddingRight="4dp"
     android:paddingBottom="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/device_constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp">
@@ -37,22 +40,22 @@
             android:id="@+id/device_limit_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
             android:text="Limit: "
             android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="@id/device_limit_card"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="@id/device_limit_card" />
+            app:layout_constraintBaseline_toBaselineOf="@id/device_start_label"
+            app:layout_constraintLeft_toRightOf="@id/device_start_card"
+            app:layout_constraintRight_toRightOf="parent" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/device_limit_card"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:outlineAmbientShadowColor="@android:color/black"
             app:cardUseCompatPadding="true"
-            app:layout_constraintLeft_toRightOf="@id/device_limit_label"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/device_stop_card">
+            app:layout_constraintBottom_toBottomOf="@id/device_stop_card"
+            app:layout_constraintLeft_toLeftOf="@id/device_limit_label"
+            app:layout_constraintTop_toTopOf="@id/device_stop_card">
 
             <EditText
                 android:id="@+id/device_limit_text"
@@ -60,6 +63,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="4dp"
                 android:background="@android:color/transparent"
+                android:ems="2"
                 android:inputType="number"
                 android:padding="4dp"
                 android:textSize="22sp" />
@@ -69,11 +73,9 @@
             android:id="@+id/device_stop_card"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:outlineAmbientShadowColor="@android:color/black"
             app:cardUseCompatPadding="true"
-            app:layout_constraintLeft_toLeftOf="@id/device_limit_card"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/device_start_card"
             app:layout_constraintTop_toBottomOf="@id/device_start_card">
 
             <LinearLayout
@@ -86,9 +88,10 @@
                     android:id="@+id/device_stop_time_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+
                     android:hint="@string/time"
                     android:onClick="stopTimePicker"
-                    android:paddingRight="8dp"
+                    android:paddingHorizontal="4dp"
                     android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
 
@@ -98,6 +101,7 @@
                     android:layout_height="match_parent"
                     android:hint="@string/date"
                     android:onClick="stopDatePicker"
+                    android:paddingHorizontal="4dp"
                     android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
             </LinearLayout>
@@ -110,9 +114,7 @@
             android:layout_marginBottom="16dp"
             android:outlineAmbientShadowColor="@android:color/black"
             app:cardUseCompatPadding="true"
-
-            app:layout_constraintLeft_toLeftOf="@id/device_limit_card"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/device_start_label"
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
@@ -125,9 +127,10 @@
                     android:id="@+id/device_start_time_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+
                     android:hint="@string/time"
                     android:onClick="startTimePicker"
-                    android:paddingRight="8dp"
+                    android:paddingHorizontal="4dp"
                     android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
 
@@ -137,6 +140,7 @@
                     android:layout_height="match_parent"
                     android:hint="@string/date"
                     android:onClick="startDatePicker"
+                    android:paddingHorizontal="4dp"
                     android:textColor="@color/myTextColor"
                     android:textSize="22sp" />
             </LinearLayout>
@@ -146,10 +150,11 @@
             android:id="@+id/device_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="36dp"
             android:textAlignment="center"
-            android:visibility="gone"
-            android:textSize="18sp"
             android:textColor="@color/myTextColor"
+            android:textSize="20sp"
+            android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintLeft_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/device_limit_card" />
@@ -157,11 +162,50 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ListView
-        android:id="@+id/meas_listview"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/measurements_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@null"
-        android:dividerHeight="0dp" />
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardMaxElevation="2dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true">
+
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <androidx.core.widget.NestedScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TableLayout
+                        android:id="@+id/measurements_table"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:stretchColumns="*" />
+                </androidx.core.widget.NestedScrollView>
+            </LinearLayout>
+        </HorizontalScrollView>
+    </androidx.cardview.widget.CardView>
+
+    <!--    <ListView
+            android:id="@+id/meas_listview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@null"
+            android:dividerHeight="0dp" />-->
 
 </LinearLayout>

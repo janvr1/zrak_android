@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Zrak Android</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
     <string name="username">Username</string>
     <string name="login_shared_pref">login_data</string>
     <string name="basic_auth">%1$s:%2$s</string>
@@ -18,4 +16,8 @@
     <string name="time">Time</string>
     <string name="date">Date</string>
     <string name="reset_time">Reset time</string>
+    <string name="no_devices_message">You do not have any devices. Add one on the web interface!</string>
+    <string name="no_measurements_message">This device does not have any measurements yet.</string>
+    <string name="refresh_measurements">Refresh measurements</string>
+    <string name="refresh_devices">Refresh devices</string>
 </resources>

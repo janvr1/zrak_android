@@ -36,18 +36,19 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    String username;
-    String password;
-    Boolean loggedIn;
-    private final int MENU_LOGOUT = 0;
-    private final int MENU_REFRESH_DEVICES = 1;
     public static final String URL_USERS = "https://api.zrak.janvr.wtf/users";
     public static final String URL_DEVICES = "https://api.zrak.janvr.wtf/devices";
     public static final String URL_MEASUREMENTS = "https://api.zrak.janvr.wtf/measurements";
+    private final int MENU_LOGOUT = 0;
+    private final int MENU_REFRESH_DEVICES = 1;
+    String username;
+    String password;
+    Boolean loggedIn;
     SimpleAdapter devices_adapter;
     ArrayList<Map<String, String>> devices_list;
     GridView devices_lv;
     String auth;
+    TextView message_tv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
         loggedIn = sharedPrefs.getBoolean("authorized", false);
+
+        message_tv = findViewById(R.id.main_message);
 
         if (!loggedIn) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -95,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 logOut();
                 break;
             case MENU_REFRESH_DEVICES:
-                Toast.makeText(this, "refresh devices", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.refresh_devices, Toast.LENGTH_SHORT).show();
                 getDevices(auth);
                 break;
         }
@@ -128,9 +131,19 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
 //                        TextView tv = findViewById(R.id.main_message);
 //                        tv.setText(response.toString());
+                        Log.d("jan", response.toString());
 
                         devices_list = new ArrayList<>();
                         Iterator<String> keys = response.keys();
+                        if (!keys.hasNext()) {
+                            message_tv.setText(R.string.no_devices_message);
+                            devices_lv.setVisibility(View.GONE);
+                            message_tv.setVisibility(View.VISIBLE);
+                            return;
+                        }
+                        message_tv.setVisibility(View.GONE);
+                        devices_lv.setVisibility(View.VISIBLE);
+
                         while (keys.hasNext()) {
                             String key = keys.next();
                             try {

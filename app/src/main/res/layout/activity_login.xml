@@ -103,14 +103,17 @@
         android:textColor="@android:color/primary_text_dark"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_password_card" />
+        app:layout_constraintTop_toBottomOf="@id/login_message" />
 
     <TextView
         android:id="@+id/login_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:textSize="20sp"
+        android:textColor="@color/myTextColor"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_button" />
+        app:layout_constraintTop_toBottomOf="@id/login_password_card"
+        app:layout_constraintBottom_toTopOf="@id/login_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>
