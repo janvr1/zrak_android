@@ -37,7 +37,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -338,59 +337,22 @@ public class DeviceActivity extends AppCompatActivity {
                                 measurementsTable.addView(tr);
 
                             }
-//                        Log.d("jan_variables", variables.toString());
                         } catch (Exception e) {
                             //bla bla
                             Log.d("janexception", e.toString());
                         }
-
-
-                        /*Log.d("jan", response.toString());
-
-                        measurements = new ArrayList<>();
-                        Iterator<String> keys = response.keys();
-                        while (keys.hasNext()) {
-                            String key = keys.next();
-                            Map<String, String> measurement = new HashMap<>();
-                            try {
-                                JSONObject json = (JSONObject) response.get(key);
-                                String utc_time = json.getString("time");
-                                SimpleDateFormat sdf_inp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                sdf_inp.setTimeZone(TimeZone.getTimeZone("UTC"));
-                                Date meas_date = sdf_inp.parse(utc_time);
-                                SimpleDateFormat sdf_out = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-                                measurement.put("time", sdf_out.format(meas_date));
-                                StringBuilder values_builder = new StringBuilder();
-                                Iterator<String> keys2 = json.keys();
-                                while (keys2.hasNext()) {
-                                    String key2 = keys2.next();
-                                    if (!key2.equals("time") && !key2.equals("dev_id") && !key2.equals("id")) {
-                                        values_builder.append(key2).append(": ").append(json.getString(key2)).append(" ");
-                                    }
-                                }
-                                measurement.put("values", values_builder.toString());
-                            } catch (Exception e) {
-                                Log.d("jan", e.toString());
-                            }
-                            measurements.add(measurement);
-                        }
-
-                        Log.d("jan", measurements.toString());
-                        Collections.sort(measurements, new MapComparator("time", false));
-                        meas_lv_adapter = new SimpleAdapter(getApplicationContext(), measurements,
-                                R.layout.measurement_card, new String[]{"time", "values"},
-                                new int[]{R.id.meas_card_time, R.id.meas_card_val});
-                        meas_lv.setAdapter(meas_lv_adapter);
-*/
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (error.networkResponse == null) return;
-                        Log.d("jan", new String(error.networkResponse.data, StandardCharsets.UTF_8));
-                        Log.d("jan", error.networkResponse.headers.toString());
-                        Toast.makeText(DeviceActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
+                        if (error.networkResponse == null) {
+                            Toast.makeText(DeviceActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (error.networkResponse.statusCode == 401) {
+                            logOut();
+                        }
 
                     }
                 }) {
@@ -403,6 +365,19 @@ public class DeviceActivity extends AppCompatActivity {
         };
         req.setShouldCache(false);
         return req;
+    }
+
+    public void logOut() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("username");
+        editor.remove("password");
+        editor.putBoolean("authorized", false);
+        editor.commit();
+
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     /*private JsonObjectRequest createDeviceRequest(final String auth, final String dev_id) {

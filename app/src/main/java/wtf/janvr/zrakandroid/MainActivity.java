@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -55,8 +54,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setTitle(getString(R.string.devices_overview));
 
-//        Toolbar toolbar = findViewById(R.id.main_toolbar);
-//        setSupportActionBar(toolbar);
 
         SharedPreferences sharedPrefs = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
         loggedIn = sharedPrefs.getBoolean("authorized", false);
@@ -177,14 +174,20 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (error.networkResponse == null) return;
-                        TextView tv = findViewById(R.id.main_message);
-                        tv.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));
+                        if (error.networkResponse == null) {
+                            Toast.makeText(MainActivity.this, getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        message_tv.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));
+                        message_tv.setVisibility(View.VISIBLE);
+                        if (error.networkResponse.statusCode == 401) {
+                            logOut();
+                        }
 
                     }
                 }) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<String, String>();
                 headers.put("Authorization", "Basic " + Base64.encodeToString(auth.getBytes(), Base64.DEFAULT));
                 return headers;
