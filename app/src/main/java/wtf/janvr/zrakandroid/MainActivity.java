@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -129,9 +128,6 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(JSONObject response) {
-//                        TextView tv = findViewById(R.id.main_message);
-//                        tv.setText(response.toString());
-                        Log.d("jan", response.toString());
 
                         devices_list = new ArrayList<>();
                         Iterator<String> keys = response.keys();
@@ -147,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
                         while (keys.hasNext()) {
                             String key = keys.next();
                             try {
-                                Log.d("zrak", response.getJSONObject(key).toString());
                                 JSONObject dev = response.getJSONObject(key);
                                 Map<String, String> dev_map = new HashMap<String, String>();
                                 dev_map.put("name", dev.getString("name"));
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                                 dev_map.put("id", String.valueOf(dev.getInt("id")));
                                 devices_list.add(dev_map);
                             } catch (JSONException e) {
-                                Log.d("zrak", e.toString());
+                                Toast.makeText(MainActivity.this, getString(R.string.error_message), Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -171,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
                                 TextView name_tv = view.findViewById(R.id.device_card_name);
                                 String dev_name = name_tv.getText().toString();
                                 Intent intent = new Intent(getApplicationContext(), DeviceActivity.class);
-                                Log.d("zrak", "device_id: " + devices_list.get(position).get("id"));
                                 intent.putExtra("device_id", devices_list.get(position).get("id"));
                                 intent.putExtra("device_name", dev_name);
                                 startActivity(intent);
@@ -183,7 +177,6 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("zrak", "network error");
                         if (error.networkResponse == null) return;
                         TextView tv = findViewById(R.id.main_message);
                         tv.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));

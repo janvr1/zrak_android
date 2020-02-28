@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -55,7 +54,6 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("zrak", "onResponse");
                         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(getString(R.string.login_shared_pref), MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString("username", username);
@@ -71,8 +69,6 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("zrak", "network error");
-
                         TextView message = findViewById(R.id.login_message);
                         if (error.networkResponse == null) return;
                         message.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));

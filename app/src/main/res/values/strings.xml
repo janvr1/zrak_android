@@ -20,4 +20,5 @@
     <string name="no_measurements_message">This device does not have any measurements yet.</string>
     <string name="refresh_measurements">Refresh measurements</string>
     <string name="refresh_devices">Refresh devices</string>
+    <string name="error_message">An error occured</string>
 </resources>

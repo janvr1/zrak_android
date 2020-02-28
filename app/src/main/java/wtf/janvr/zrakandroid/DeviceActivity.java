@@ -186,9 +186,8 @@ public class DeviceActivity extends AppCompatActivity {
                     Date date_start = sdf_inp.parse(start_time + " " + start_date);
                     start_datetime_utc = sdf_out.format(date_start);
 
-                    Log.d("jan", start_datetime_utc);
                 } catch (ParseException pe) {
-                    Log.d("jan", pe.toString());
+                    Toast.makeText(this, R.string.error_message, Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -205,9 +204,8 @@ public class DeviceActivity extends AppCompatActivity {
                     Date date_stop = sdf_inp.parse(stop_time + " " + stop_date);
                     stop_datetime_utc = sdf_out.format(date_stop);
 
-                    Log.d("jan", stop_datetime_utc);
                 } catch (ParseException pe) {
-                    Log.d("jan", pe.toString());
+                    Toast.makeText(this, R.string.error_message, Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -254,7 +252,6 @@ public class DeviceActivity extends AppCompatActivity {
         if (start != null) url += "&start=" + start;
         if (stop != null) url += "&stop=" + stop;
         if (lim != null) url += "&lim=" + lim;
-        Log.d("jan", url);
 
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -286,10 +283,8 @@ public class DeviceActivity extends AppCompatActivity {
                             while (iter.hasNext()) {
                                 measurements_array.add((JSONObject) response.get(iter.next()));
                             }
-                            Log.d("jan_arr", measurements_array.toString());
                             JSONComparator comparator = new JSONComparator("time", false);
                             Collections.sort(measurements_array, comparator);
-                            Log.d("jan_arr", measurements_array.toString());
 
                             while (var_i.hasNext()) {
                                 String s = var_i.next();
@@ -309,9 +304,7 @@ public class DeviceActivity extends AppCompatActivity {
                                         variables.add(s);
                                     }
                                 }
-                                Log.d("jan s", s);
                             }
-                            Log.d("jan", variables.toString());
                             measurementsTable.addView(th);
                             Iterator<String> keys = response.keys();
 
@@ -334,7 +327,11 @@ public class DeviceActivity extends AppCompatActivity {
                                         Date meas_date = sdf_inp.parse(measurement.get(variable).toString());
                                         tv.setText(sdf_out.format(meas_date));
                                     } else {
-                                        tv.setText(measurement.get(variable).toString());
+                                        String val = measurement.get(variable).toString();
+                                        if (val.endsWith(".0")) {
+                                            val = val.substring(0, val.indexOf("."));
+                                        }
+                                        tv.setText(val);
                                     }
                                     tr.addView(tv);
                                 }
