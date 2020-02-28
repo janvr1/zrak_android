@@ -6,6 +6,6 @@ Mobilna aplikacija deluje kot "viewer" in zato omogoča le funkcionalnosti prija
 Dodajanje/spreminjanje/odstranjevanje uporabnikov, naprav in meritev je mogoče le preko spletnega vmesnika.
 
 ### Screenshots
+![Prijava](./screenshots/login.jpg)
 ![Glavni meni](./screenshots/main_menu.jpg)
 ![Pregled meritev](./screenshots/device_measurement.jpg)
-![Prijava](./screenshots/login.jpg)
