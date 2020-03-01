@@ -34,9 +34,10 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String URL_USERS = "https://api.zrak.janvr.wtf/users";
-    public static final String URL_DEVICES = "https://api.zrak.janvr.wtf/devices";
-    public static final String URL_MEASUREMENTS = "https://api.zrak.janvr.wtf/measurements";
+    public static final String HOST = "https://api.zrak.janvr.wtf";
+    public static final String URL_USERS = "/users";
+    public static final String URL_DEVICES = "/devices";
+    public static final String URL_MEASUREMENTS = "/measurements";
     private final int MENU_LOGOUT = 0;
     private final int MENU_REFRESH_DEVICES = 1;
     String username;
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
     private JsonObjectRequest createDevicesRequest(final String auth) {
         JsonObjectRequest req = new JsonObjectRequest
-                (Request.Method.GET, URL_DEVICES, null, new Response.Listener<JSONObject>() {
+                (Request.Method.GET, HOST + URL_DEVICES, null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {

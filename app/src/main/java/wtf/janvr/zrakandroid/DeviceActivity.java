@@ -246,7 +246,7 @@ public class DeviceActivity extends AppCompatActivity {
                                                         @Nullable final String start,
                                                         @Nullable final String stop,
                                                         @Nullable final String lim) {
-        String url = MainActivity.URL_MEASUREMENTS;
+        String url = MainActivity.HOST + MainActivity.URL_MEASUREMENTS;
         url += "?device_id=" + dev_id;
         if (start != null) url += "&start=" + start;
         if (stop != null) url += "&stop=" + stop;
@@ -305,14 +305,11 @@ public class DeviceActivity extends AppCompatActivity {
                                 }
                             }
                             measurementsTable.addView(th);
-                            Iterator<String> keys = response.keys();
 
                             SimpleDateFormat sdf_inp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             sdf_inp.setTimeZone(TimeZone.getTimeZone("UTC"));
                             SimpleDateFormat sdf_out = new SimpleDateFormat("HH:mm'\n'dd.MM.yyyy");
 
-                           /* while (keys.hasNext()) {
-                                String meas_key = keys.next();*/
                             for (JSONObject measurement : measurements_array) {
                                 TableRow tr = new TableRow(getApplicationContext());
                                 tr.setGravity(Gravity.CENTER_VERTICAL);
@@ -322,7 +319,6 @@ public class DeviceActivity extends AppCompatActivity {
                                     tv.setPadding(4, 4, 16, 4);
                                     tv.setTextColor(getResources().getColor(R.color.myTextColor, ctx.getTheme()));
                                     if (variable.equals("time")) {
-//                                        tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                                         Date meas_date = sdf_inp.parse(measurement.get(variable).toString());
                                         tv.setText(sdf_out.format(meas_date));
                                     } else {
@@ -379,41 +375,4 @@ public class DeviceActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
-    /*private JsonObjectRequest createDeviceRequest(final String auth, final String dev_id) {
-        JsonObjectRequest req = new JsonObjectRequest
-                (Request.Method.GET, MainActivity.URL_DEVICES, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("zrak", "network error");
-                        if (error.networkResponse == null) return;
-                        TextView tv = findViewById(R.id.main_message);
-                        tv.setText(new String(error.networkResponse.data, StandardCharsets.UTF_8));
-                        Toast.makeText(DeviceActivity.this, R.string.network_error, Toast.LENGTH_SHORT).show();
-
-                    }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<String, String>();
-                headers.put("Authorization", "Basic " + Base64.encodeToString(auth.getBytes(), Base64.DEFAULT));
-                return headers;
-            }
-
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("device_id", dev_id);
-                return params;
-            }
-        };
-        return req;
-    }*/
 }

@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public JsonObjectRequest createLoginRequest(final String username, final String password) {
         final String auth = getString(R.string.basic_auth, username, password);
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, MainActivity.URL_USERS, null,
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, MainActivity.HOST + MainActivity.URL_USERS, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
